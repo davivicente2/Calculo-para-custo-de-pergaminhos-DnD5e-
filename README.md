@@ -38,6 +38,8 @@ Tudo é processado diretamente no navegador, sem necessidade de servidor ou depe
 
 ## 🧰 Estrutura do Projeto
 Calculo-para-custo-de-pergaminhos-DnD5e/
+
 ├── index.html        # Arquivo principal (HTML, CSS e JS integrados)
+
 └── README.md         # Documentação do projeto
 
