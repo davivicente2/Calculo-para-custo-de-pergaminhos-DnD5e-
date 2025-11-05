@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calculadora de Criação de Pergaminhos</title>
+<style>
+  /* estilos mantidos e organizados */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",Tahoma,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+  .container{max-width:1600px;margin:0 auto}
+  h1{text-align:center;color:#fff;margin-bottom:30px;font-size:2.5em;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
+  .card{background:#fff;border-radius:15px;padding:25px;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .card h2{color:#667eea;margin-bottom:20px;font-size:1.5em;border-bottom:2px solid #667eea;padding-bottom:10px}
+  .options-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;margin-bottom:20px}
+  .option-group{display:flex;flex-direction:column}
+  .option-group label{font-weight:600;margin-bottom:8px;color:#333;font-size:.95em}
+  .option-group select,.option-group input[type="number"]{padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:1em;transition:border-color .3s}
+  .option-group select:focus,.option-group input[type="number"]:focus{outline:none;border-color:#667eea}
+  .checkbox-group{display:flex;align-items:center;gap:10px;padding:10px;background:#f8f9fa;border-radius:8px;margin-bottom:10px}
+  .checkbox-group input[type="checkbox"]{width:20px;height:20px;cursor:pointer}
+  .checkbox-group label{cursor:pointer;font-weight:500;color:#555;flex:1}
+  .checkbox-group .info{font-size:.85em;color:#888}
+  .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:15px 40px;font-size:1.1em;border-radius:10px;cursor:pointer;transition:transform .2s,box-shadow .2s;font-weight:600;display:block;margin:20px auto}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(102,126,234,.4)}
+  .results-table{width:100%;border-collapse:collapse;margin-top:20px;font-size:.9em}
+  .results-table th,.results-table td{padding:10px 8px;text-align:center;border:1px solid #e0e0e0}
+  .results-table th{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;font-weight:600;position:sticky;top:0;font-size:.85em}
+  .results-table tr:hover{background-color:#f8f9fa}
+  .results-table tbody tr:nth-child(even){background-color:#fafafa}
+  .highlight{background-color:#fff3cd!important;font-weight:600}
+  .info-box{background:#e7f3ff;border-left:4px solid #2196F3;padding:15px;margin-bottom:20px;border-radius:5px}
+  .info-box h3{color:#1976D2;margin-bottom:10px}
+  .info-box ul{margin-left:20px}
+  .summary-card{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-top:20px}
+  .summary-item{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:20px;border-radius:10px;text-align:center}
+  .summary-item h3{font-size:.9em;margin-bottom:10px;opacity:.9}
+  .summary-item .value{font-size:2em;font-weight:700}
+  .reduction-display{background:#d4edda;border:2px solid #28a745;border-radius:10px;padding:20px;margin:20px 0;text-align:center}
+  .reduction-display h3{color:#155724;margin-bottom:10px;font-size:1.3em}
+  .reduction-steps{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:1.1em;color:#155724;margin-top:10px}
+  .hidden{display:none}
+  @media (max-width:768px){h1{font-size:1.8em}.options-grid{grid-template-columns:1fr}.results-table{font-size:.75em}.results-table th,.results-table td{padding:6px 4px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📜 Calculadora de Criação de Pergaminhos D&D 5e</h1>
+
+  <div class="card">
+    <h2>⚙️ Configurações do Personagem</h2>
+    <div class="options-grid">
+      <div class="option-group">
+        <label for="spellLevel">Nível da Magia</label>
+        <select id="spellLevel">
+          <option value="0">Cantrip</option>
+          <option value="1">Nível 1</option>
+          <option value="2">Nível 2</option>
+          <option value="3" selected>Nível 3</option>
+          <option value="4">Nível 4</option>
+          <option value="5">Nível 5</option>
+          <option value="6">Nível 6</option>
+          <option value="7">Nível 7</option>
+          <option value="8">Nível 8</option>
+          <option value="9">Nível 9</option>
+        </select>
+      </div>
+
+      <div class="option-group">
+        <label for="race">Raça (Horas de Descanso)</label>
+        <select id="race">
+          <option value="8">Raça Normal (8h descanso)</option>
+          <option value="4" selected>Elfo (4h descanso - Transe)</option>
+          <option value="6">Warforged (6h descanso)</option>
+        </select>
+      </div>
+
+      <div class="option-group">
+        <label for="workHours">Horas de Trabalho por Dia</label>
+        <input type="number" id="workHours" value="8" min="1" max="24" readonly style="background:#f0f0f0">
+        <small style="color:#666;margin-top:5px">Calculado: 24h - descanso</small>
+      </div>
+
+      <div class="option-group">
+        <label for="additionalCost">Custo de ingredientes das magias (gp)</label>
+        <input type="number" id="additionalCost" value="0" min="0" step="0.01">
+        <small style="color:#666;margin-top:5px">Componentes especiais, etc.</small>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h3>✨ Reduções de Tempo e Custo</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px">
+        <div class="checkbox-group">
+          <input type="checkbox" id="adroitCrafter" checked>
+          <label for="adroitCrafter"><strong>Adroit Crafter</strong><span class="info">× 0.5 tempo (não reduz custo)</span></label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="homunculi" checked>
+          <label for="homunculi"><strong>Deryan's Helpful Homunculi</strong><span class="info">× 0.5 tempo (+100 gp fixos por pergaminho)</span></label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="calligrapher" checked>
+          <label for="calligrapher"><strong>Proficiência em Caligrafia</strong><span class="info">× 0.75 tempo (25% redução, não reduz custo)</span></label>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" id="calcBtn">🧮 Calcular Produção</button>
+  </div>
+
+  <div id="resultsSection" class="card hidden">
+    <h2>📊 Resultados da Produção</h2>
+
+    <div class="reduction-display">
+      <h3>🎯 Fórmula de Redução Aplicada</h3>
+      <div class="reduction-steps" id="reductionFormula"></div>
+      <div style="margin-top:15px;font-size:1.2em;color:#155724">
+        <strong>Tempo Final:</strong> <span id="finalMultiplier"></span> do tempo base
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-item">
+        <h3>Tempo Efetivo</h3>
+        <div class="value" id="effectiveTime">-</div>
+      </div>
+      <div class="summary-item">
+        <h3>Pergaminhos/Dia (8h)</h3>
+        <div class="value" id="scrollsPerDay">-</div>
+      </div>
+      <div class="summary-item">
+        <h3>Custo Materiais</h3>
+        <div class="value" id="materialCost">-</div>
+      </div>
+      <div class="summary-item">
+        <h3>GP/Scroll Total</h3>
+        <div class="value" id="totalCostPerScroll">-</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:30px;color:#667eea">📋 Tabela de Produção Detalhada - Todos os Níveis</h3>
+
+    <div style="background:#f8f9fa;padding:15px;border-radius:8px;margin:15px 0">
+      <strong>📖 Legenda da Tabela:</strong>
+      <ul style="margin:10px 0 0 20px;color:#555">
+        <li><strong>Tempo Base:</strong> Dias e horas necessários segundo o DMG (sem modificadores)</li>
+        <li><strong>Tempo Efetivo:</strong> Tempo real após aplicar os modificadores</li>
+        <li><strong>Pergaminhos por Dia:</strong> Produção por jornada (8/12/16h)</li>
+        <li><strong>Custo Base:</strong> Preço dos materiais segundo o DMG</li>
+        <li><strong>Custo Efetivo:</strong> Preço real dos materiais após modificadores</li>
+      </ul>
+    </div>
+
+    <div style="overflow-x:auto;margin-top:15px">
+      <table class="results-table" id="productionTable">
+        <thead>
+          <tr>
+            <th rowspan="2" style="vertical-align:middle">Nível<br>Magia</th>
+            <th colspan="3" style="background:#5568c4">⏱️ Tempo de Produção</th>
+            <th colspan="3" style="background:#5568c4">📜 Pergaminhos por Dia</th>
+            <th colspan="4" style="background:#5568c4">💰 Custos (em gp)</th>
+          </tr>
+          <tr>
+            <th>Dias<br>Base</th>
+            <th>Horas<br>Base</th>
+            <th>Horas<br>Efetivas<br><small>(×<span id="multHeader">0.1875</span>)</small></th>
+            <th>8h trabalho</th>
+            <th>12h trabalho</th>
+            <th>16h trabalho</th>
+            <th>Materiais<br>Base</th>
+            <th>Materiais<br>Efetivo<br><small>(×<span id="costMultHeader">1.0000</span>)</small></th>
+            <th>Adicionais<br>(ingredientes)</th>
+            <th>Custo Total<br>por Pergaminho<br><small id="deryanNote">(materiais + adicionais)</small></th>
+          </tr>
+        </thead>
+        <tbody id="productionBody"></tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:20px;padding:15px;background:#fff3cd;border-radius:8px;border-left:4px solid #ffc107">
+      <strong>💡 Sobre os Custos na última coluna:</strong>
+      <ul style="margin:10px 0 0 20px">
+        <li><strong>Materiais Efetivos:</strong> Custo base dos materiais após aplicar reduções (se houver)</li>
+        <li><strong>Deryan (se ativo):</strong> +100 gp fixos por pergaminho</li>
+        <li><strong>Custos Adicionais:</strong> Componentes especiais (adicionados por pergaminho)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📖 Referência Completa de Regras</h2>
+    <div class="info-box">
+      <h3>⏱️ Tempo Base de Criação (PHB'24):</h3>
+      <ul>
+        <li><strong>Cantrip:</strong> 1 dia</li>
+        <li><strong>Nível 1:</strong> 1 dia</li>
+        <li><strong>Nível 2:</strong> 3 dias</li>
+        <li><strong>Nível 3:</strong> 5 dias</li>
+        <li><strong>Nível 4:</strong> 10 dias</li>
+        <li><strong>Nível 5:</strong> 25 dias</li>
+        <li><strong>Nível 6:</strong> 40 dias</li>
+        <li><strong>Nível 7:</strong> 50 dias</li>
+        <li><strong>Nível 8:</strong> 60 dias</li>
+        <li><strong>Nível 9:</strong> 120 dias</li>
+      </ul>
+    </div>
+
+    <div class="info-box">
+      <h3>💰 Custo Base de Materiais (PHB'24):</h3>
+      <ul>
+        <li><strong>Cantrip:</strong> 15 gp</li>
+        <li><strong>Nível 1:</strong> 25 gp</li>
+        <li><strong>Nível 2:</strong> 100 gp</li>
+        <li><strong>Nível 3:</strong> 150 gp</li>
+        <li><strong>Nível 4:</strong> 1,000 gp</li>
+        <li><strong>Nível 5:</strong> 1,500 gp</li>
+        <li><strong>Nível 6:</strong> 10,000 gp</li>
+        <li><strong>Nível 7:</strong> 12,500 gp</li>
+        <li><strong>Nível 8:</strong> 15,000 gp</li>
+        <li><strong>Nível 9:</strong> 50,000 gp</li>
+      </ul>
+    </div>
+
+    <div class="info-box">
+      <h3>✨ Modificadores (Aplicados Multiplicativamente):</h3>
+      <ul>
+        <li><strong>Adroit Crafter (Feat):</strong> × 0.5 tempo (não reduz custo)</li>
+        <li><strong>Deryan's Helpful Homunculi (Magia):</strong> × 0.5 tempo + 100 gp fixos por pergaminho</li>
+        <li><strong>Proficiência em Calligrapher's Supplies:</strong> × 0.75 tempo (não reduz custo)</li>
+      </ul>
+      <p style="margin-top:10px"><strong>Exemplo de cálculo para Nível 3:</strong></p>
+      <p>Tempo = 40h × 0.5 (Adroit) × 0.5 (Homunculi) × 0.75 (Prof.) = 40h × 0.1875 = <strong>7.5h</strong></p>
+    </div>
+
+    <div class="info-box">
+      <h3>🌙 Raças e Descanso:</h3>
+      <ul>
+        <li><strong>Elfo (Transe):</strong> 4h de descanso → 20h de trabalho disponíveis/dia</li>
+        <li><strong>Warforged:</strong> 6h de descanso → 18h de trabalho disponíveis/dia</li>
+        <li><strong>Outras Raças:</strong> 8h de descanso → 16h de trabalho disponíveis/dia</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+/* Dados e constantes */
+const BASE_DATA = {
+  0: { days: 1, hours: 8, baseCost: 15, label: 'Cantrip' },
+  1: { days: 1, hours: 8, baseCost: 25, label: '1º' },
+  2: { days: 3, hours: 24, baseCost: 100, label: '2º' },
+  3: { days: 5, hours: 40, baseCost: 150, label: '3º' },
+  4: { days: 10, hours: 80, baseCost: 1000, label: '4º' },
+  5: { days: 25, hours: 200, baseCost: 1500, label: '5º' },
+  6: { days: 40, hours: 320, baseCost: 10000, label: '6º' },
+  7: { days: 50, hours: 400, baseCost: 12500, label: '7º' },
+  8: { days: 60, hours: 480, baseCost: 15000, label: '8º' },
+  9: { days: 120, hours: 960, baseCost: 50000, label: '9º' }
+};
+const DERYAN_INITIAL_COST = 100; // custo fixo por pergaminho quando homunculi ativo
+const nf = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+/* Elementos */
+const el = {
+  spellLevel: document.getElementById('spellLevel'),
+  race: document.getElementById('race'),
+  workHours: document.getElementById('workHours'),
+  additionalCost: document.getElementById('additionalCost'),
+  adroitCrafter: document.getElementById('adroitCrafter'),
+  homunculi: document.getElementById('homunculi'),
+  calligrapher: document.getElementById('calligrapher'),
+  calcBtn: document.getElementById('calcBtn'),
+  resultsSection: document.getElementById('resultsSection'),
+  reductionFormula: document.getElementById('reductionFormula'),
+  finalMultiplier: document.getElementById('finalMultiplier'),
+  effectiveTime: document.getElementById('effectiveTime'),
+  scrollsPerDay: document.getElementById('scrollsPerDay'),
+  materialCost: document.getElementById('materialCost'),
+  totalCostPerScroll: document.getElementById('totalCostPerScroll'),
+  multHeader: document.getElementById('multHeader'),
+  costMultHeader: document.getElementById('costMultHeader'),
+  deryanNote: document.getElementById('deryanNote'),
+  productionBody: document.getElementById('productionBody')
+};
+
+/* Helpers */
+const fmtDecimal = (n, digits = 2) => {
+  if (n === 0) return '0.00';
+  if (n < 0.01 && n > 0) return n.toFixed(4);
+  if (n < 0.1 && n > 0) return n.toFixed(3);
+  return n.toFixed(digits);
+};
+const fmtGP = (n) => nf.format(Math.ceil(n)) + ' gp';
+
+/* Atualiza horas de trabalho ao mudar raça */
+function updateWorkHours() {
+  const rest = parseInt(el.race.value, 10);
+  el.workHours.value = 24 - rest;
+}
+if (el.race) {
+  el.race.addEventListener('change', updateWorkHours);
+  updateWorkHours();
+}
+
+/* Calcula multiplicadores e passos
+   Observação: Adroit e Calligrapher reduzem apenas tempo, não custo */
+function computeMultipliers() {
+  let timeMult = 1, costMult = 1;
+  const steps = ['Tempo Base'];
+
+  if (el.adroitCrafter && el.adroitCrafter.checked) { timeMult *= 0.5; steps.push('×0.5 (Adroit)'); }
+  if (el.homunculi && el.homunculi.checked) { timeMult *= 0.5; steps.push('×0.5 (Homunculi)'); }
+  if (el.calligrapher && el.calligrapher.checked) { timeMult *= 0.75; steps.push('×0.75 (Prof. Cal.)'); }
+
+  return { timeMult, costMult, steps };
+}
+
+/* Computa métricas para um nível específico
+   Agora: Deryan adiciona custo fixo por pergaminho quando ativo.
+   additionalCost também é somado por pergaminho. */
+function computeForLevel(level, timeMult, costMult, additionalCost, homunculi) {
+  const data = BASE_DATA[level];
+  const effHours = data.hours * timeMult;
+  const effCost = data.baseCost * costMult; // costMult geralmente será 1 (nenhum modificador de custo aplicado)
+  const sPer8 = effHours > 0 ? (8 / effHours) : 0;
+  const sPer12 = effHours > 0 ? (12 / effHours) : 0;
+  const sPer16 = effHours > 0 ? (16 / effHours) : 0;
+
+  // coerção segura do custo adicional (por pergaminho)
+  const addCost = Number(additionalCost) || 0;
+  // custo fixo do Deryan por pergaminho (se ativo)
+  const deryanPerScrollThisLine = homunculi ? DERYAN_INITIAL_COST : 0;
+  // custo total por pergaminho (materiais efetivos + adicionais + Deryan)
+  const gpPerScroll8h = effCost + addCost + deryanPerScrollThisLine;
+
+  return { data, effHours, effCost, sPer8, sPer12, sPer16, addCost, deryanPerScrollThisLine, gpPerScroll8h };
+}
+
+/* Atualiza UI com os resultados principais e tabela */
+function updateUI(spellLevel, multipliers, additionalCost) {
+  const { timeMult, costMult, steps } = multipliers;
+  if (el.resultsSection) el.resultsSection.classList.remove('hidden');
+  if (el.reductionFormula) el.reductionFormula.textContent = steps.join(' ');
+  if (el.finalMultiplier) el.finalMultiplier.textContent = `${(timeMult * 100).toFixed(2)}%`;
+
+  // Para o nível selecionado usamos custo fixo de Deryan por pergaminho (se ativo)
+  const selected = computeForLevel(spellLevel, timeMult, costMult, additionalCost, el.homunculi && el.homunculi.checked);
+  const amortPerSelected = selected.deryanPerScrollThisLine;
+  const totalPerScrollSelected = selected.effCost + amortPerSelected + (parseFloat(additionalCost) || 0);
+
+  if (el.effectiveTime) el.effectiveTime.textContent = selected.effHours.toFixed(2) + ' h';
+  if (el.scrollsPerDay) el.scrollsPerDay.textContent = selected.sPer8 > 0 ? fmtDecimal(selected.sPer8) : '0.00';
+  if (el.materialCost) el.materialCost.textContent = fmtGP(selected.effCost);
+  if (el.totalCostPerScroll) el.totalCostPerScroll.textContent = fmtGP(totalPerScrollSelected);
+
+  if (el.multHeader) el.multHeader.textContent = timeMult.toFixed(4);
+  if (el.costMultHeader) el.costMultHeader.textContent = costMult.toFixed(4);
+
+  // Nota do Deryan
+  if (el.deryanNote) {
+    if ((el.homunculi && el.homunculi.checked) || parseFloat(additionalCost) > 0) {
+      let note = '(materiais';
+      if (el.homunculi && el.homunculi.checked) note += ' + Deryan 100gp por pergaminho';
+      if (parseFloat(additionalCost) > 0) note += ' + custos adicionais';
+      note += ')';
+      el.deryanNote.innerHTML = note;
+    } else {
+      el.deryanNote.innerHTML = '(materiais apenas)';
+    }
+  }
+
+  // Construir tabela com custos corrigidos
+  if (el.productionBody) {
+    el.productionBody.innerHTML = '';
+    for (let lvl = 0; lvl <= 9; lvl++) {
+      const row = computeForLevel(lvl, timeMult, costMult, additionalCost, el.homunculi && el.homunculi.checked);
+      const tr = document.createElement('tr');
+      if (lvl === spellLevel) tr.classList.add('highlight');
+
+      tr.innerHTML = `
+        <td><strong>${row.data.label}</strong></td>
+        <td>${row.data.days}</td>
+        <td>${row.data.hours}</td>
+        <td><strong>${row.effHours.toFixed(1)} h</strong></td>
+        <td>${fmtDecimal(row.sPer8)}</td>
+        <td>${fmtDecimal(row.sPer12)}</td>
+        <td>${fmtDecimal(row.sPer16)}</td>
+        <td>${nf.format(row.data.baseCost)} gp</td>
+        <td>${nf.format(Math.ceil(row.effCost))} gp</td>
+        <td>${row.addCost > 0 ? nf.format(Math.ceil(row.addCost)) + ' gp' : '-'}</td>
+        <td><strong>${nf.format(Math.ceil(row.gpPerScroll8h))} gp</strong></td>
+      `;
+      el.productionBody.appendChild(tr);
+    }
+  }
+
+  // Scroll suave até resultados
+  if (el.resultsSection) el.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* Função principal */
+function calculate() {
+  const spellLevel = el.spellLevel ? parseInt(el.spellLevel.value, 10) : 3;
+  const additionalCost = (el.additionalCost && !isNaN(parseFloat(el.additionalCost.value))) ? parseFloat(el.additionalCost.value) : 0;
+  const multipliers = computeMultipliers();
+  updateUI(spellLevel, multipliers, additionalCost);
+}
+
+/* Eventos */
+if (el.calcBtn) el.calcBtn.addEventListener('click', calculate);
+
+// Run initial calculation once DOM is ready
+calculate();
+});
+</script>
+</body>
+</html>
